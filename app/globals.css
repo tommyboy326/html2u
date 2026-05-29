@@ -1,260 +1,581 @@
+/* ============================================================================
+ * html2u — design system
+ *
+ * Foundation: Apple.com aesthetic (DESIGN.md) — light-first, SF Pro, single
+ * Action Blue (#0066cc), pill CTAs, hairline borders, no decorative shadows
+ * or gradients. Quiet UI, content speaks.
+ *
+ * Floating chrome: Liquid Glass (per macOS 26 spec) — frosted backdrop-filter
+ * with prefers-reduced-transparency fallback. Applied ONLY to the safety
+ * banner (a sticky chrome over user content), per DESIGN.md's elevation rules.
+ *
+ * Theme: light by default, dark via OS preference OR explicit toggle.
+ *   :root                        → light tokens
+ *   @media prefers-color-scheme: dark → dark tokens (only when no explicit choice)
+ *   [data-theme="light"]         → user forced light (overrides @media)
+ *   [data-theme="dark"]          → user forced dark
+ * ============================================================================ */
+
 :root {
-  --bg: #0b0c10;
-  --panel: #16181d;
-  --panel-2: #1d2026;
-  --border: #2a2e37;
-  --text: #e6e8ec;
-  --muted: #9aa0aa;
-  --accent: #6366f1;
-  --accent-hover: #4f52d6;
-  --error: #f87171;
-  --warn: #fbbf24;
-  --success: #34d399;
+  /* Surface */
+  --canvas: #ffffff;
+  --parchment: #f5f5f7;
+  --pearl: #fafafc;
+  --surface-tile-dark: #272729;
+  --surface-chip-translucent: rgba(210, 210, 215, 0.64);
+
+  /* Ink */
+  --ink: #1d1d1f;
+  --ink-muted-80: #333333;
+  --ink-muted-48: #7a7a7a;
+  --body-muted: #cccccc;
+
+  /* Brand */
+  --primary: #0066cc;       /* Action Blue */
+  --primary-focus: #0071e3;
+  --primary-on-dark: #2997ff;
+  --on-primary: #ffffff;
+
+  /* Lines */
+  --hairline: #e0e0e0;
+  --divider-soft: #f0f0f0;
+
+  /* Semantic */
+  --error: #d32f2f;
+  --warn-ink: #6b4a08;
+
+  /* Type stack — system-ui resolves to real SF Pro on Apple devices */
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui,
+                  "Helvetica Neue", Helvetica, Arial, "PingFang TC",
+                  "Microsoft JhengHei", sans-serif;
+  --font-text:    -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui,
+                  "Helvetica Neue", Helvetica, Arial, "PingFang TC",
+                  "Microsoft JhengHei", sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Spacing — 8px base */
+  --space-xxs: 4px;
+  --space-xs:  8px;
+  --space-sm:  12px;
+  --space-md:  17px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-xxl: 48px;
+  --space-section: 80px;
+
+  /* Radius */
+  --r-xs:   5px;
+  --r-sm:   8px;
+  --r-md:   11px;
+  --r-lg:   18px;
+  --r-pill: 9999px;
+
+  /* Liquid Glass — frosted chrome surface */
+  --lg-blur: 20px;
+  --lg-saturate: 180%;
+  --lg-tinted-parchment: rgba(245, 245, 247, 0.72);
+  --lg-warm:             rgba(254, 247, 224, 0.78); /* safety banner amber */
+  --lg-border:           rgba(0, 0, 0, 0.06);
+
+  /* Motion — Apple's signature ease */
+  --ease-spring: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --t-fast: 0.18s;
+  --t-base: 0.28s;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-geist-sans), system-ui, "PingFang TC", "Microsoft JhengHei", sans-serif;
-  line-height: 1.6;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-text);
+  /* DESIGN.md body: 17px / 400 / 1.47 / -0.374px — the "reading not scanning" pace */
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-.container {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 48px 20px 80px;
+/* Headlines — SF Pro Display, weight 600, the "Apple tight" tracking */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
 }
+h1 { font-size: 40px; line-height: 1.10; letter-spacing: 0; }
+h2 { font-size: 28px; line-height: 1.14; letter-spacing: 0; }
+h3 { font-size: 21px; line-height: 1.19; letter-spacing: 0.231px; }
+
+/* Type utility classes — name-mapped to DESIGN.md tokens */
+.hero-display { font-family: var(--font-display); font-size: 56px; font-weight: 600;
+                line-height: 1.07; letter-spacing: -0.28px; color: var(--ink); margin: 0; }
+.display-lg   { font-family: var(--font-display); font-size: 40px; font-weight: 600;
+                line-height: 1.10; color: var(--ink); margin: 0; }
+.lead         { font-family: var(--font-display); font-size: 28px; font-weight: 400;
+                line-height: 1.14; letter-spacing: 0.196px; color: var(--ink-muted-80); margin: 0; }
+.tagline      { font-family: var(--font-display); font-size: 21px; font-weight: 600;
+                line-height: 1.19; letter-spacing: 0.231px; color: var(--ink); margin: 0; }
+.caption      { font-size: 14px; line-height: 1.43; letter-spacing: -0.224px; }
+.fine-print   { font-size: 12px; line-height: 1.0; letter-spacing: -0.12px; }
+
+.muted { color: var(--ink-muted-48); font-size: 14px; line-height: 1.43;
+         letter-spacing: -0.224px; margin: 0; }
+.error { color: var(--error); font-size: 14px; letter-spacing: -0.224px; margin: 0; }
+.warn  { color: var(--warn-ink); font-size: 14px; letter-spacing: -0.224px; margin: 0; }
+
+/* ===================================================================
+ * Layout containers
+ * ================================================================ */
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 64px 24px 96px;
+}
+.container.wide { max-width: 1280px; }
 
 .centered {
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 20px;
+  padding: 24px;
+  background: var(--parchment);
 }
 
-h1 {
-  font-size: 1.6rem;
-  margin: 0;
-}
-h2 {
-  font-size: 1.2rem;
-  margin: 0;
-}
+/* Stacks / rows */
+.stack       { display: flex; flex-direction: column; gap: 17px; }
+.stack-sm    { display: flex; flex-direction: column; gap: 8px; }
+.row         { display: flex; gap: 17px; align-items: flex-end; }
+.rowbetween  { display: flex; justify-content: space-between; align-items: center; }
 
-.muted {
-  color: var(--muted);
-  font-size: 0.92rem;
-  margin: 0;
-}
-.error {
-  color: var(--error);
-  font-size: 0.9rem;
-  margin: 0;
-}
-.warn {
-  color: var(--warn);
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.row {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-}
-.rowbetween {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+/* ===================================================================
+ * Cards — Apple.com utility card: white canvas, hairline border, 18px
+ * No decorative shadows (per DESIGN.md "Don't add shadows to cards")
+ * ================================================================ */
 
 .card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px;
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  padding: 24px;
 }
 .card.success {
-  border-color: color-mix(in srgb, var(--success) 50%, var(--border));
+  background: var(--parchment);
+  border-color: var(--divider-soft);
 }
-.unlock {
+.card.unlock {
   width: 100%;
   max-width: 380px;
   text-align: center;
+  padding: 32px 28px;
 }
+.card.unlock h2 { font-size: 24px; }
+
+/* ===================================================================
+ * Form controls
+ * ================================================================ */
 
 label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 0.88rem;
-  color: var(--muted);
+  font-size: 14px;
+  color: var(--ink-muted-80);
+  font-weight: 400;
+  letter-spacing: -0.224px;
 }
 
-input,
+input[type="text"],
+input[type="password"],
+input:not([type]),
 textarea,
 select {
   width: 100%;
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  color: var(--text);
-  padding: 10px 12px;
-  font-size: 0.95rem;
-  font-family: inherit;
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  padding: 11px 14px;
+  font-family: var(--font-text);
+  font-size: 17px;
+  line-height: 1.24;
+  letter-spacing: -0.374px;
+  transition: border-color var(--t-fast) var(--ease-spring),
+              box-shadow   var(--t-fast) var(--ease-spring);
 }
 textarea {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0;
   resize: vertical;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.85rem;
+  min-height: 220px;
 }
-input:focus,
-textarea:focus,
-select:focus {
+input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
 }
+input::placeholder, textarea::placeholder { color: var(--ink-muted-48); }
+
+/* Native select chevron customization (subtle) */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%237a7a7a' d='M1 1l5 5 5-5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* ===================================================================
+ * Buttons — DESIGN.md grammar
+ *   default <button type=submit> = Action Blue pill (primary)
+ *   .utility  = ink-dark rect, 8px (compact ops)
+ *   .link     = quiet text link
+ *   .danger   = pearl-on-canvas with red ink (delete in admin)
+ *   active scale(0.96) is the universal Apple micro-interaction
+ * ================================================================ */
 
 button {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 9px;
-  padding: 10px 18px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-family: var(--font-text);
   cursor: pointer;
-  transition: background 0.15s ease;
+  border: none;
+  transition: transform var(--t-fast) var(--ease-spring),
+              background-color var(--t-fast) var(--ease-spring);
 }
-button:hover:not(:disabled) {
-  background: var(--accent-hover);
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button:active:not(:disabled) { transform: scale(0.96); }
+button:focus-visible {
+  outline: 2px solid var(--primary-focus);
+  outline-offset: 2px;
 }
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-button.link {
-  background: none;
-  color: var(--muted);
-  padding: 4px 8px;
+
+/* Primary pill — the signature Action Blue */
+button[type="submit"], button.primary {
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 17px;
   font-weight: 400;
-  text-decoration: underline;
+  letter-spacing: -0.374px;
+  padding: 11px 22px;
+  border-radius: var(--r-pill);
 }
-button.link:hover:not(:disabled) {
-  background: none;
-  color: var(--text);
+button[type="submit"]:hover:not(:disabled),
+button.primary:hover:not(:disabled) {
+  background: var(--primary-focus);
 }
 
+/* Compact dark utility (8px radius) */
+button.utility {
+  background: var(--ink);
+  color: var(--canvas);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.224px;
+  padding: 8px 15px;
+  border-radius: var(--r-sm);
+}
+button.utility:hover:not(:disabled) { background: #333335; }
+
+/* Text link button */
+button.link {
+  background: transparent;
+  color: var(--primary);
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  letter-spacing: -0.224px;
+}
+button.link:hover:not(:disabled) { background: rgba(0, 102, 204, 0.08); }
+
+/* Danger utility (admin table row delete) */
 button.danger {
-  background: #3a1d22;
-  color: #fca5a5;
-  padding: 5px 12px;
-  font-size: 0.82rem;
+  background: var(--canvas);
+  color: var(--error);
+  font-size: 13px;
+  padding: 6px 13px;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(211, 47, 47, 0.25);
+  letter-spacing: -0.12px;
 }
-button.danger:hover:not(:disabled) {
-  background: #4a2128;
+button.danger:hover:not(:disabled) { background: rgba(211, 47, 47, 0.06); }
+
+/* Field header (when we need a label-style title with an inline action on the right) */
+.field-label {
+  font-size: 14px;
+  color: var(--ink-muted-80);
+  font-weight: 400;
+  letter-spacing: -0.224px;
 }
 
+/* HTML drop zone — wraps the textarea, accepts dragged .html files */
+.dropzone { position: relative; }
+.dropzone-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(0, 102, 204, 0.08);
+  border: 2px dashed var(--primary);
+  border-radius: var(--r-sm);
+  color: var(--primary);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.374px;
+  pointer-events: none; /* let drop events reach the wrapper */
+}
+.dropzone.drag-active textarea { border-color: var(--primary); }
+
+/* Inline checkbox */
 .checkbox {
   flex-direction: row;
   align-items: flex-start;
   gap: 10px;
   cursor: pointer;
+  color: var(--ink-muted-80);
 }
 .checkbox input {
   width: auto;
   margin-top: 4px;
+  accent-color: var(--primary);
 }
 
-/* --- content viewer (sandboxed iframe + un-removable safety banner) --- */
+/* ===================================================================
+ * Content viewer  +  Liquid Glass safety banner
+ * The banner is a frosted floating chrome over the iframe content.
+ * Uploaded HTML can never hide or alter it (it's outside the iframe).
+ * ================================================================ */
+
 .viewer {
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  background: var(--canvas);
 }
+
 .safety-banner {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 14px;
-  background: #3a2d10;
-  color: #fde68a;
-  border-bottom: 1px solid #6b5418;
-  font-size: 0.82rem;
+  padding: 10px 18px;
+  background: var(--lg-warm);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter:         blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  border-bottom: 1px solid var(--lg-border);
+  color: var(--warn-ink);
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: -0.12px;
+  font-family: var(--font-text);
 }
-.safety-text {
-  flex: 1;
-  line-height: 1.4;
-}
+.safety-text { flex: 1; }
+.safety-text b { font-weight: 600; }
+
 .report-btn {
   flex: 0 0 auto;
-  background: transparent;
-  border: 1px solid #6b5418;
-  color: #fde68a;
-  padding: 5px 12px;
-  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--warn-ink);
+  border: 1px solid var(--lg-border);
+  font-size: 13px;
+  font-weight: 400;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  letter-spacing: -0.12px;
 }
-.report-btn:hover:not(:disabled) {
-  background: #4a3a14;
-}
+.report-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.85); }
+
 .content-frame {
   flex: 1 1 auto;
   width: 100%;
   border: none;
-  background: white;
+  /* Always white — user content reads as if printed on neutral paper,
+     regardless of our app's theme. Their HTML's own bg always wins on top. */
+  background: #ffffff;
 }
 
-/* --- admin dashboard --- */
-.container.wide {
-  max-width: 1100px;
+/* Accessibility: Liquid Glass falls back to flat tinted bar */
+@media (prefers-reduced-transparency: reduce) {
+  .safety-banner {
+    background: #fff3cd;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .report-btn { background: var(--canvas); }
 }
+
+/* ===================================================================
+ * Admin dashboard table
+ * ================================================================ */
+
 .tablewrap {
   overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  background: var(--canvas);
 }
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 14px;
+  letter-spacing: -0.224px;
+  font-family: var(--font-text);
 }
-.admin-table th,
-.admin-table td {
-  padding: 9px 12px;
+.admin-table th, .admin-table td {
+  padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider-soft);
   white-space: nowrap;
+  color: var(--ink);
 }
+.admin-table tr:last-child td { border-bottom: none; }
 .admin-table th {
-  color: var(--muted);
+  color: var(--ink-muted-48);
   font-weight: 600;
-  background: var(--panel-2);
+  font-size: 12px;
+  letter-spacing: -0.12px;
+  text-transform: uppercase;
+  background: var(--parchment);
 }
-.admin-table tr.flagged td {
-  background: #2a1216;
-}
-.admin-table a {
-  color: var(--accent);
-  text-decoration: none;
-}
-.admin-table .small {
-  font-size: 0.78rem;
-}
+.admin-table tr.flagged td { background: rgba(211, 47, 47, 0.04); }
+.admin-table a { color: var(--primary); text-decoration: none; }
+.admin-table a:hover { text-decoration: underline; }
+.admin-table .small { font-size: 12px; color: var(--ink-muted-48); }
+
 .pagelink {
-  color: var(--accent);
+  color: var(--primary);
   text-decoration: none;
-  padding: 0 8px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+.pagelink:hover { text-decoration: underline; }
+
+/* ===================================================================
+ * Dark theme tokens
+ * Applied when the user's OS prefers dark AND no explicit theme is set,
+ * OR when the user has explicitly chosen dark via the toggle.
+ * Apple-style dark palette: near-black canvas (#1d1d1f, not pure black),
+ * Sky Link Blue as the action color (DESIGN.md's primary-on-dark).
+ * ================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas:           #1d1d1f;
+    --parchment:        #2a2a2c;
+    --pearl:            #252527;
+    --ink:              #f5f5f7;
+    --ink-muted-80:     #c7c7cc;
+    --ink-muted-48:     #8e8e93;
+    --body-muted:       #6e6e73;
+    --primary:          #2997ff;  /* Sky Link Blue — DESIGN.md primary-on-dark */
+    --primary-focus:    #3aa3ff;
+    --hairline:         #424245;
+    --divider-soft:     #2c2c2e;
+    --error:            #ff6b6b;
+    --warn-ink:         #fde68a;
+    --lg-tinted-parchment: rgba(28, 28, 30, 0.72);
+    --lg-warm:          rgba(80, 60, 15, 0.85);
+    --lg-border:        rgba(255, 255, 255, 0.08);
+  }
+}
+
+[data-theme="dark"] {
+  --canvas:           #1d1d1f;
+  --parchment:        #2a2a2c;
+  --pearl:            #252527;
+  --ink:              #f5f5f7;
+  --ink-muted-80:     #c7c7cc;
+  --ink-muted-48:     #8e8e93;
+  --body-muted:       #6e6e73;
+  --primary:          #2997ff;
+  --primary-focus:    #3aa3ff;
+  --hairline:         #424245;
+  --divider-soft:     #2c2c2e;
+  --error:            #ff6b6b;
+  --warn-ink:         #fde68a;
+  --lg-tinted-parchment: rgba(28, 28, 30, 0.72);
+  --lg-warm:          rgba(80, 60, 15, 0.85);
+  --lg-border:        rgba(255, 255, 255, 0.08);
+}
+
+/* Dark-mode specific tweaks for components that need explicit overrides */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) button.utility {
+    background: #3a3a3c;
+    color: var(--ink);
+  }
+  :root:not([data-theme="light"]) button.utility:hover:not(:disabled) {
+    background: #48484a;
+  }
+  :root:not([data-theme="light"]) .report-btn {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  :root:not([data-theme="light"]) .report-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.16);
+  }
+  :root:not([data-theme="light"]) .admin-table tr.flagged td {
+    background: rgba(255, 107, 107, 0.08);
+  }
+}
+[data-theme="dark"] button.utility {
+  background: #3a3a3c;
+  color: var(--ink);
+}
+[data-theme="dark"] button.utility:hover:not(:disabled) {
+  background: #48484a;
+}
+[data-theme="dark"] .report-btn {
+  background: rgba(255, 255, 255, 0.08);
+}
+[data-theme="dark"] .report-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+}
+[data-theme="dark"] .admin-table tr.flagged td {
+  background: rgba(255, 107, 107, 0.08);
+}
+
+/* ===================================================================
+ * Theme toggle widget — Liquid Glass pill, fixed top-right
+ * Cycles: system → light → dark → system
+ * ================================================================ */
+
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--lg-tinted-parchment);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter:         blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  border: 1px solid var(--lg-border);
+  color: var(--ink);
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.theme-toggle:hover { background: var(--parchment); }
+.theme-toggle:active { transform: scale(0.94); }
+
+@media (prefers-reduced-transparency: reduce) {
+  .theme-toggle {
+    background: var(--parchment);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
