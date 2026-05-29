@@ -26,7 +26,9 @@ v2 hardens the public anonymous HTML-sharing service against the new threat mode
   2. `curl -I https://html2u.vercel.app/s/<sample>/raw?t=<valid>` returns the existing strict per-response CSP unchanged — none of the wrapper headers from criterion 1 leak into the raw content route, and `X-Frame-Options: DENY` is NOT present there.
   3. The wrapper sends both modern `Reporting-Endpoints: csp-endpoint="…/api/csp-report?ctx=wrapper"` and a `Content-Security-Policy-Report-Only` header carrying `report-to csp-endpoint` plus a legacy `report-uri` fallback; the existing inline theme-bootstrap script still runs and the home page paints without FOUC.
   4. The operator can confirm in the Supabase project that the `pg_cron` extension is enabled and that `cron.schedule` jobs for `shares`, `rate_limits`, and `csp_violations` cleanup are committed in `schema.sql` (the previously-commented block is now live).
-**Plans**: TBD
+**Plans**: 2 plans
+  - [ ] 01-01-PLAN.md — SEC-02 baseline headers + SEC-02b Report-Only wrapper CSP via next.config.ts, scoped to exclude /s/<id>/raw
+  - [ ] 01-02-PLAN.md — SEC-OPS-01 pg_cron + three cron.schedule jobs + forward-compatible csp_violations table; operator applies to production Supabase
 
 ### Phase 2: i18n Foundation Bundle
 **Goal**: A first-time visitor with `Accept-Language: zh-TW,en;q=0.8` lands on a fully zh-Hant page with no hydration warning, no FOUC, and a top-right Liquid Glass language pill they can use to switch to English without losing their `/s/<id>` URL or scroll position. The choice persists in a BCP-47-script-tagged `NEXT_LOCALE` cookie that survives every subsequent visit. Adding a Japanese stub messages file proves the architecture is drop-in. Every visible string in the app — including the not-yet-written legal pages, all error responses, and the safety banner — has a key in both `messages/en.json` and `messages/zh-Hant.json`, CI fails on key drift, and Server Actions return `errorCode` strings so the `lib/` layer stays locale-agnostic.
@@ -73,7 +75,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4. Phase 3's three verticals 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Security Headers Foundation | 0/TBD | Not started | - |
+| 1. Security Headers Foundation | 0/2 | Not started | - |
 | 2. i18n Foundation Bundle | 0/TBD | Not started | - |
 | 3. Defense Verticals | 0/TBD | Not started | - |
 | 4. Security Status Capstone | 0/TBD | Not started | - |
@@ -86,3 +88,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4. Phase 3's three verticals 
 - **Phase 4 ships last by construction** — SEC-05 is an aggregator over signals only Phases 1–3 produce (verdict rows, CSP rows, legal-page git SHAs). Building it earlier would require mocking every signal it consumes, which defeats its purpose as the operator-facing acceptance test for the milestone.
 - **Operator decisions already baked in:** TW jurisdiction (narrows SEC-04 acceptance to TW law, no US DMCA-agent line); pg_cron in v2 (SEC-OPS-01 is explicit in Phase 1; SEC-04 retention copy can truthfully promise 30 days); wrapper CSP Report-Only (SEC-02b ships in Phase 1 alongside SEC-02; CRIT-5/MOD-4 mitigation); Safe Browsing quota-remaining widget (Phase 4 SEC-05 criterion 1).
 - **Hard ordering constraints preserved end-to-end:** (1) SEC-02+SEC-02b before SEC-03 ✓ (Phase 1 → Phase 3); (2) I18N-01..05 atomic ✓ (all in Phase 2); (3) SEC-04 needs I18N-03 provider live + SEC-OPS-01 pg_cron live ✓ (Phase 3 depends on both Phase 1 and Phase 2); (4) SEC-05 last ✓ (Phase 4).
+- **Phase 1 csp_violations table (planning decision, 2026-05-29):** Plan 01-02 creates a minimal, forward-compatible `csp_violations` table now even though SEC-03 owns the full ingest schema. Reason: `cron.schedule` stores SQL as text and does not validate the referenced table at schedule time, so the `cleanup_csp_violations` job would error on every run until the table exists. Creating it now keeps Success Criterion #4 truthful as written (all three jobs committed AND valid); SEC-03 will ALTER/extend, not replace, it (backward-compatible per CLAUDE.md migration constraint).
