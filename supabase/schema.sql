@@ -31,6 +31,24 @@ create table if not exists public.rate_limits (
   expires_at timestamptz not null
 );
 
+-- CSP violation reports. Created here (minimal, forward-compatible) so the
+-- cleanup_csp_violations cron job below references a real table from day one.
+-- SEC-03 (Phase 3) owns the full ingest schema and will ALTER/extend this table
+-- (e.g. unique constraint on the dedup key, NOT NULL tightening). Keep additive.
+-- Dedup key (SEC-03): (document_uri_path, directive, blocked_host, source_host).
+create table if not exists public.csp_violations (
+  id                bigint generated always as identity primary key,
+  document_uri_path text,
+  directive         text,
+  blocked_host      text,
+  source_host       text,
+  count             integer not null default 1,
+  created_at        timestamptz not null default now()
+);
+
+-- Index for the 30-day TTL cleanup job's WHERE clause (created_at < cutoff).
+create index if not exists csp_violations_created_at_idx on public.csp_violations (created_at);
+
 -- =========================================================================
 -- Row Level Security
 -- Enable RLS with NO policies => anon / authenticated roles are denied all
@@ -40,6 +58,7 @@ create table if not exists public.rate_limits (
 
 alter table public.shares enable row level security;
 alter table public.rate_limits enable row level security;
+alter table public.csp_violations enable row level security;
 
 -- =========================================================================
 -- Functions (SECURITY DEFINER so they operate on the tables regardless of role)
@@ -110,10 +129,17 @@ $$;
 
 -- =========================================================================
 -- Auto-cleanup of expired rows (pg_cron).
--- In Supabase: Dashboard → Database → Extensions → enable "pg_cron" first.
--- Reads already filter on expires_at, so this is just housekeeping.
+-- The statement below self-enables the pg_cron extension. In Supabase, if the
+-- SQL editor lacks privileges to create the extension, enable "pg_cron" first
+-- under Dashboard → Database → Extensions, then re-run this file.
+-- Reads already filter on expires_at, so the shares/rate_limits jobs are just
+-- housekeeping; the csp_violations job enforces the 30-day retention promised
+-- by the legal pages (SEC-04).
+-- Idempotent: `cron.schedule` is upsert-like by job name — re-running this file
+-- updates the existing job in place rather than creating duplicates.
 -- =========================================================================
 
--- create extension if not exists pg_cron;
--- select cron.schedule('cleanup_shares',      '0 * * * *',  $$delete from public.shares      where expires_at < now()$$);
--- select cron.schedule('cleanup_rate_limits', '*/30 * * * *', $$delete from public.rate_limits where expires_at < now()$$);
+create extension if not exists pg_cron;
+select cron.schedule('cleanup_shares',          '0 * * * *',   $$delete from public.shares         where expires_at < now()$$);
+select cron.schedule('cleanup_rate_limits',     '*/30 * * * *', $$delete from public.rate_limits    where expires_at < now()$$);
+select cron.schedule('cleanup_csp_violations',  '0 3 * * *',   $$delete from public.csp_violations where created_at < now() - interval '30 days'$$);
