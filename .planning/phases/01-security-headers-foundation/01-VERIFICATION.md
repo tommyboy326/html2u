@@ -1,21 +1,21 @@
 ---
 phase: 01-security-headers-foundation
 verified: 2026-05-29T00:00:00Z
-status: human_needed
-score: 4/4 must-haves code-verified; 1 requires live-prod human confirmation
+status: passed
+score: 4/4 must-haves verified (criterion #4 live-prod proof captured 2026-05-29)
 overrides_applied: 0
 human_verification:
   - test: "Run `select jobname, schedule, command from cron.job order by jobname;` against the html2u production Supabase project"
     expected: "Exactly three rows: cleanup_csp_violations, cleanup_rate_limits, cleanup_shares — with the delete commands matching schema.sql; AND Database → Extensions shows pg_cron ENABLED; AND `select 1 from public.csp_violations limit 1;` returns without a relation-not-found error"
-    why_human: "Enabling pg_cron + registering cron jobs is a privileged production database action Claude cannot perform or observe. Build/type/grep checks pass WITHOUT it (the documented false-positive risk T-01-08). The operator confirmed 'I've applied it' but the raw three-row cron.job proof was NOT captured inline (see 01-02-SUMMARY.md 'Evidence honesty note'). The criterion 4 contract is live-prod state, which is only attested, not evidenced."
+    result: "RESOLVED 2026-05-29 — operator ran the query in the production SQL editor; returned exactly three rows: cleanup_csp_violations (0 3 * * *), cleanup_rate_limits (*/30 * * * *), cleanup_shares (0 * * * *), with delete commands matching schema.sql. pg_cron self-enabled cleanly (no permission error; cron.schedule returned jobids 1-3). NOTE: the initial operator attestation was based on running a STALE saved query that lacked the Phase 1 additions (cron.job did not exist on first check) — re-running the current schema.sql Phase-1 block fixed it. This is exactly the false-positive the T-01-08 gate was designed to catch."
 ---
 
 # Phase 1: Security Headers Foundation Verification Report
 
 **Phase Goal:** Every response — wrapper and content — carries a correctly-scoped set of baseline security headers, ships a Report-Only wrapper CSP that emits violation reports to a documented endpoint, and never leaks wrapper headers into the raw-content route. The operator can hand a `curl -I` of any route to a scanner and have it pass without backsliding on UX-02's no-FOUC inline theme bootstrap, and pg_cron is enabled in production so downstream phases can promise the retention they implement.
 **Verified:** 2026-05-29
-**Status:** human_needed
-**Re-verification:** No — initial verification
+**Status:** passed (criterion #4 live-prod proof captured 2026-05-29)
+**Re-verification:** Yes — criterion #4 closed after operator captured the three-row `cron.job` proof in production
 
 ## Goal Achievement
 
