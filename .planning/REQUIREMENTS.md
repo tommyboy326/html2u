@@ -71,28 +71,30 @@ Explicitly excluded. Documented to prevent scope creep or re-litigation.
 
 ## Traceability
 
-Empty initially. Populated by the roadmapper agent during ROADMAP.md creation.
+Populated by the roadmapper agent during ROADMAP.md creation (2026-05-29).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SEC-01 | — | Pending |
-| SEC-02 | — | Pending |
-| SEC-02b | — | Pending |
-| SEC-03 | — | Pending |
-| SEC-04 | — | Pending |
-| SEC-05 | — | Pending |
-| SEC-OPS-01 | — | Pending |
-| I18N-01 | — | Pending |
-| I18N-02 | — | Pending |
-| I18N-03 | — | Pending |
-| I18N-04 | — | Pending |
-| I18N-05 | — | Pending |
+| SEC-02 | Phase 1 — Security Headers Foundation | Pending |
+| SEC-02b | Phase 1 — Security Headers Foundation | Pending |
+| SEC-OPS-01 | Phase 1 — Security Headers Foundation | Pending |
+| I18N-01 | Phase 2 — i18n Foundation Bundle | Pending |
+| I18N-02 | Phase 2 — i18n Foundation Bundle | Pending |
+| I18N-03 | Phase 2 — i18n Foundation Bundle | Pending |
+| I18N-04 | Phase 2 — i18n Foundation Bundle | Pending |
+| I18N-05 | Phase 2 — i18n Foundation Bundle | Pending |
+| SEC-01 | Phase 3 — Defense Verticals | Pending |
+| SEC-03 | Phase 3 — Defense Verticals | Pending |
+| SEC-04 | Phase 3 — Defense Verticals | Pending |
+| SEC-05 | Phase 4 — Security Status Capstone | Pending |
 
 **Coverage:**
 - v2 requirements: 12 total
-- Mapped to phases: 0 (filled by roadmapper)
-- Unmapped: 12 ⚠️ (expected — roadmap not yet created)
+- Mapped to phases: 12 ✓
+- Unmapped: 0
+- Orphaned: 0
+- Duplicated: 0
 
 ---
 *Requirements defined: 2026-05-29*
-*Last updated: 2026-05-29 after research synthesis + operator open-question resolution*
+*Last updated: 2026-05-29 after roadmap creation — traceability populated, all 12 requirements mapped*
