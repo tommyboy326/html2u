@@ -19,7 +19,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Operations
 
-- [ ] **SEC-OPS-01**: Supabase `pg_cron` extension is enabled in the production project and `cron.schedule` is committed for (a) `delete from shares where expires_at < now()`, (b) `delete from rate_limits where expires_at < now()`, (c) `delete from csp_violations where created_at < now() - interval '30 days'`; schema.sql updated to commit these `cron.schedule` calls (uncomments the previously-commented block)
+- [x] **SEC-OPS-01**: Supabase `pg_cron` extension is enabled in the production project and `cron.schedule` is committed for (a) `delete from shares where expires_at < now()`, (b) `delete from rate_limits where expires_at < now()`, (c) `delete from csp_violations where created_at < now() - interval '30 days'`; schema.sql updated to commit these `cron.schedule` calls (uncomments the previously-commented block)
 
 ### Internationalization
 
@@ -77,7 +77,7 @@ Populated by the roadmapper agent during ROADMAP.md creation (2026-05-29).
 |-------------|-------|--------|
 | SEC-02 | Phase 1 — Security Headers Foundation | Complete |
 | SEC-02b | Phase 1 — Security Headers Foundation | Complete |
-| SEC-OPS-01 | Phase 1 — Security Headers Foundation | Pending |
+| SEC-OPS-01 | Phase 1 — Security Headers Foundation | Complete |
 | I18N-01 | Phase 2 — i18n Foundation Bundle | Pending |
 | I18N-02 | Phase 2 — i18n Foundation Bundle | Pending |
 | I18N-03 | Phase 2 — i18n Foundation Bundle | Pending |

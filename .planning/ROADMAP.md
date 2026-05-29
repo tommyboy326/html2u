@@ -10,7 +10,7 @@ v2 hardens the public anonymous HTML-sharing service against the new threat mode
 - Integer phases (1, 2, 3, 4): Planned milestone work
 - Decimal phases (e.g., 2.1) reserved for urgent inserts; none present at planning time
 
-- [ ] **Phase 1: Security Headers Foundation** - Global response headers + Report-Only wrapper CSP that the rest of the milestone reports into
+- [x] **Phase 1: Security Headers Foundation** - Global response headers + Report-Only wrapper CSP that the rest of the milestone reports into (completed 2026-05-29)
 - [ ] **Phase 2: i18n Foundation Bundle** - Atomic next-intl provider, bilingual coverage, switcher, ja-stub drop-in proof
 - [ ] **Phase 3: Defense Verticals** - Safe Browsing URL gate, CSP report ingest, bilingual legal pages on Phases 1+2 foundations
 - [ ] **Phase 4: Security Status Capstone** - Operator-facing aggregator that turns every Phase 1–3 signal into a weekly-review surface
@@ -28,7 +28,7 @@ v2 hardens the public anonymous HTML-sharing service against the new threat mode
   4. The operator can confirm in the Supabase project that the `pg_cron` extension is enabled and that `cron.schedule` jobs for `shares`, `rate_limits`, and `csp_violations` cleanup are committed in `schema.sql` (the previously-commented block is now live).
 **Plans**: 2 plans
   - [x] 01-01-PLAN.md — SEC-02 baseline headers + SEC-02b Report-Only wrapper CSP via next.config.ts, scoped to exclude /s/<id>/raw
-  - [ ] 01-02-PLAN.md — SEC-OPS-01 pg_cron + three cron.schedule jobs + forward-compatible csp_violations table; operator applies to production Supabase
+  - [x] 01-02-PLAN.md — SEC-OPS-01 pg_cron + three cron.schedule jobs + forward-compatible csp_violations table; operator applies to production Supabase
 
 ### Phase 2: i18n Foundation Bundle
 **Goal**: A first-time visitor with `Accept-Language: zh-TW,en;q=0.8` lands on a fully zh-Hant page with no hydration warning, no FOUC, and a top-right Liquid Glass language pill they can use to switch to English without losing their `/s/<id>` URL or scroll position. The choice persists in a BCP-47-script-tagged `NEXT_LOCALE` cookie that survives every subsequent visit. Adding a Japanese stub messages file proves the architecture is drop-in. Every visible string in the app — including the not-yet-written legal pages, all error responses, and the safety banner — has a key in both `messages/en.json` and `messages/zh-Hant.json`, CI fails on key drift, and Server Actions return `errorCode` strings so the `lib/` layer stays locale-agnostic.
@@ -75,7 +75,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4. Phase 3's three verticals 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Security Headers Foundation | 1/2 | In Progress|  |
+| 1. Security Headers Foundation | 2/2 | Complete   | 2026-05-29 |
 | 2. i18n Foundation Bundle | 0/TBD | Not started | - |
 | 3. Defense Verticals | 0/TBD | Not started | - |
 | 4. Security Status Capstone | 0/TBD | Not started | - |
