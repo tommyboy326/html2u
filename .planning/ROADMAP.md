@@ -27,7 +27,7 @@ v2 hardens the public anonymous HTML-sharing service against the new threat mode
   3. The wrapper sends both modern `Reporting-Endpoints: csp-endpoint="…/api/csp-report?ctx=wrapper"` and a `Content-Security-Policy-Report-Only` header carrying `report-to csp-endpoint` plus a legacy `report-uri` fallback; the existing inline theme-bootstrap script still runs and the home page paints without FOUC.
   4. The operator can confirm in the Supabase project that the `pg_cron` extension is enabled and that `cron.schedule` jobs for `shares`, `rate_limits`, and `csp_violations` cleanup are committed in `schema.sql` (the previously-commented block is now live).
 **Plans**: 2 plans
-  - [ ] 01-01-PLAN.md — SEC-02 baseline headers + SEC-02b Report-Only wrapper CSP via next.config.ts, scoped to exclude /s/<id>/raw
+  - [x] 01-01-PLAN.md — SEC-02 baseline headers + SEC-02b Report-Only wrapper CSP via next.config.ts, scoped to exclude /s/<id>/raw
   - [ ] 01-02-PLAN.md — SEC-OPS-01 pg_cron + three cron.schedule jobs + forward-compatible csp_violations table; operator applies to production Supabase
 
 ### Phase 2: i18n Foundation Bundle
@@ -75,7 +75,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4. Phase 3's three verticals 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Security Headers Foundation | 0/2 | Not started | - |
+| 1. Security Headers Foundation | 1/2 | In Progress|  |
 | 2. i18n Foundation Bundle | 0/TBD | Not started | - |
 | 3. Defense Verticals | 0/TBD | Not started | - |
 | 4. Security Status Capstone | 0/TBD | Not started | - |
