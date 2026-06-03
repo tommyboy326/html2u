@@ -5,7 +5,7 @@
 // anything tampered with or expired. No server-side session storage required.
 
 import crypto from "node:crypto";
-import { SESSION_SECRET } from "./config";
+import { SESSION_SECRET, ADMIN_API_KEY } from "./config";
 
 function sign(data: string): string {
   return crypto.createHmac("sha256", SESSION_SECRET).update(data).digest("base64url");
@@ -28,6 +28,16 @@ export function verifyToken(scope: string, token: string | undefined): boolean {
   const expected = Buffer.from(sign(`${scope}:${exp}`));
   if (provided.length !== expected.length) return false;
   return crypto.timingSafeEqual(provided, expected);
+}
+
+// Constant-time check of an API key against ADMIN_API_KEY. Returns false when no
+// key is configured (API disabled) or when the provided value is missing/wrong.
+export function verifyApiKey(provided: string | undefined | null): boolean {
+  if (!ADMIN_API_KEY || !provided) return false;
+  const a = Buffer.from(provided);
+  const b = Buffer.from(ADMIN_API_KEY);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 export const ADMIN_COOKIE = "admin_session";

@@ -11,6 +11,12 @@ export const SESSION_SECRET =
 // Dev fallback: ADMIN_PASSWORD, used only when Google auth is NOT configured.
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 
+// API key for the programmatic create endpoint (POST /api/shares). When set, the
+// API requires it; when empty, the API is DISABLED (the public web form stays
+// open regardless). Generate with: openssl rand -base64 32
+export const ADMIN_API_KEY = process.env.ADMIN_API_KEY || "";
+export const HAS_API_KEY = !!ADMIN_API_KEY;
+
 export const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
   .split(",")
   .map((s) => s.trim().toLowerCase())

@@ -70,11 +70,15 @@ npm run dev                     # http://localhost:3000
 完整環境變數說明見 [`.env.example`](./.env.example)。
 
 ### API 範例
+程式化建立需帶 **API 金鑰**(`ADMIN_API_KEY`);未設定金鑰時 API 關閉(回 `503`),網頁表單不受影響。
 ```bash
-curl -X POST https://<host>/api/shares -H "Content-Type: application/json" \
+curl -X POST https://<host>/api/shares \
+  -H "Authorization: Bearer $ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
   -d '{"mode":"link","html":"<h1>hi</h1>","ttl":"7d"}'
 # mode: link(預設) | password(需 password) | magic(一次性)
 # allowExternal: true 可放寬 CSP 以載入外部 CDN(安全性降低)
+# 帶金鑰的呼叫視為信任來源,不受「建立地區限制」約束。
 ```
 
 ## 架構

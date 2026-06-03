@@ -5,25 +5,38 @@ import {
   CREATE_WINDOW,
   CREATE_GLOBAL_LIMIT,
   CREATE_GLOBAL_WINDOW,
-  isCreateAllowedCountry,
+  HAS_API_KEY,
   type TtlKey,
 } from "@/lib/config";
+import { verifyApiKey } from "@/lib/session";
 import { createShare, rateLimit, type ShareMode } from "@/lib/shares";
 
 export const dynamic = "force-dynamic";
 
-// Anonymous programmatic share creation (CLI / scripts / Claude). Rate-limited
-// per IP. For stronger protection put this behind Vercel BotID / a WAF rule.
+// Programmatic share creation (CLI / scripts / Claude). Requires an API key:
 //
-//   curl -X POST https://<host>/api/shares -H "Content-Type: application/json" \
+//   curl -X POST https://<host>/api/shares \
+//     -H "Authorization: Bearer $ADMIN_API_KEY" \
+//     -H "Content-Type: application/json" \
 //     -d '{"mode":"link","html":"<h1>hi</h1>","ttl":"7d"}'
 //
 //   mode: "link" (default) | "password" (needs "password") | "magic" (one-time link)
 //   allowExternal: true to permit external CDNs/resources (weaker CSP; default false)
+//
+// The key holder is trusted, so the geo restriction is skipped here (so you can
+// call from a CI box or abroad); the anonymous web form keeps the geo gate. Rate
+// limits stay as a key-leak backstop. When ADMIN_API_KEY is unset the API is off.
 export async function POST(req: Request) {
   const h = await headers();
-  if (!isCreateAllowedCountry(h.get("x-vercel-ip-country")))
-    return Response.json({ error: "geo restricted" }, { status: 403 });
+
+  if (!HAS_API_KEY)
+    return Response.json({ error: "API disabled" }, { status: 503 });
+  const authz = h.get("authorization");
+  const key = authz?.startsWith("Bearer ")
+    ? authz.slice(7)
+    : h.get("x-api-key");
+  if (!verifyApiKey(key))
+    return Response.json({ error: "unauthorized" }, { status: 401 });
 
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (!(await rateLimit(`create:${ip}`, CREATE_LIMIT, CREATE_WINDOW)))
