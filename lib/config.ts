@@ -65,4 +65,28 @@ export const VIEW_LIMIT_PER_IP = 20; // serves per IP per share ...
 export const VIEW_LIMIT_PER_SHARE = 60; // serves across all IPs per share ...
 export const VIEW_WINDOW = 60; // ... per minute
 
+// Geo-restriction for share CREATION only. Viewing stays global so a link sent
+// to an overseas counterpart still opens — the spam vector is creation, not
+// viewing. Comma-separated ISO-3166 country codes (Vercel's x-vercel-ip-country);
+// empty string disables the restriction. Default: Taiwan only.
+export const CREATE_ALLOWED_COUNTRIES = (process.env.CREATE_ALLOWED_COUNTRIES ?? "TW")
+  .split(",")
+  .map((s) => s.trim().toUpperCase())
+  .filter(Boolean);
+
+// Returns true if a request from `country` may create shares. Fails OPEN when no
+// geo header is present (local dev, or non-Vercel origin) so we never lock out
+// development — on Vercel the header is always set and cannot be spoofed.
+export function isCreateAllowedCountry(country: string | null | undefined): boolean {
+  if (CREATE_ALLOWED_COUNTRIES.length === 0) return true; // restriction disabled
+  if (!country) return true; // no edge geo header — don't block
+  return CREATE_ALLOWED_COUNTRIES.includes(country.toUpperCase());
+}
+
+// Global creation throttle, ACROSS ALL IPs. The per-IP CREATE_LIMIT is useless
+// against an IP-rotating botnet (each IP stays just under it); this site-wide cap
+// is the backstop.
+export const CREATE_GLOBAL_LIMIT = 20; // total new shares site-wide ...
+export const CREATE_GLOBAL_WINDOW = 60; // ... per minute
+
 export const IS_PROD = process.env.NODE_ENV === "production";

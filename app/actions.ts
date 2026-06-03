@@ -9,6 +9,9 @@ import {
   IS_PROD,
   CREATE_LIMIT,
   CREATE_WINDOW,
+  CREATE_GLOBAL_LIMIT,
+  CREATE_GLOBAL_WINDOW,
+  isCreateAllowedCountry,
   UNLOCK_LIMIT,
   UNLOCK_WINDOW,
   type TtlKey,
@@ -121,9 +124,16 @@ export async function createShareAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const h = await headers();
+  if (!isCreateAllowedCountry(h.get("x-vercel-ip-country")))
+    return { error: "此服務目前僅開放台灣地區建立分享連結" };
+
   const ip = await clientIp();
   if (!(await rateLimit(`create:${ip}`, CREATE_LIMIT, CREATE_WINDOW)))
     return { error: "建立次數過多,請稍後再試" };
+  // Site-wide backstop against IP-rotating spam (each IP stays under the per-IP cap).
+  if (!(await rateLimit("create:global", CREATE_GLOBAL_LIMIT, CREATE_GLOBAL_WINDOW)))
+    return { error: "目前建立量過大,請稍後再試" };
 
   try {
     const raw = String(formData.get("mode") || "link");

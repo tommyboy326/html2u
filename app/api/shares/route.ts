@@ -1,5 +1,13 @@
 import { headers } from "next/headers";
-import { IS_PROD, CREATE_LIMIT, CREATE_WINDOW, type TtlKey } from "@/lib/config";
+import {
+  IS_PROD,
+  CREATE_LIMIT,
+  CREATE_WINDOW,
+  CREATE_GLOBAL_LIMIT,
+  CREATE_GLOBAL_WINDOW,
+  isCreateAllowedCountry,
+  type TtlKey,
+} from "@/lib/config";
 import { createShare, rateLimit, type ShareMode } from "@/lib/shares";
 
 export const dynamic = "force-dynamic";
@@ -14,8 +22,13 @@ export const dynamic = "force-dynamic";
 //   allowExternal: true to permit external CDNs/resources (weaker CSP; default false)
 export async function POST(req: Request) {
   const h = await headers();
+  if (!isCreateAllowedCountry(h.get("x-vercel-ip-country")))
+    return Response.json({ error: "geo restricted" }, { status: 403 });
+
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (!(await rateLimit(`create:${ip}`, CREATE_LIMIT, CREATE_WINDOW)))
+    return Response.json({ error: "rate limited" }, { status: 429 });
+  if (!(await rateLimit("create:global", CREATE_GLOBAL_LIMIT, CREATE_GLOBAL_WINDOW)))
     return Response.json({ error: "rate limited" }, { status: 429 });
 
   let body: Record<string, unknown>;
