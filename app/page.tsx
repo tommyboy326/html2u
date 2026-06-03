@@ -1,4 +1,5 @@
 import CreateForm from "@/app/_components/CreateForm";
+import { createRegionNotice } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export default function Home() {
           內容在沙箱中顯示,並封鎖對外傳輸。
         </p>
       </header>
-      <CreateForm />
+      <CreateForm regionNotice={createRegionNotice()} />
     </main>
   );
 }

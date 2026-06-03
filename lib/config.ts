@@ -88,6 +88,19 @@ export function isCreateAllowedCountry(country: string | null | undefined): bool
   return CREATE_ALLOWED_COUNTRIES.includes(country.toUpperCase());
 }
 
+const COUNTRY_NAMES: Record<string, string> = {
+  TW: "台灣", HK: "香港", JP: "日本", KR: "韓國",
+  US: "美國", CN: "中國", SG: "新加坡", MO: "澳門",
+};
+
+// Human-readable zh-Hant notice describing the creation geo-restriction, for the
+// UI. Returns null when creation is open to everyone (restriction disabled).
+export function createRegionNotice(): string | null {
+  if (CREATE_ALLOWED_COUNTRIES.length === 0) return null;
+  const names = CREATE_ALLOWED_COUNTRIES.map((c) => COUNTRY_NAMES[c] ?? c).join("、");
+  return `目前僅開放${names}地區建立分享(檢視不受限)`;
+}
+
 // Global creation throttle, ACROSS ALL IPs. The per-IP CREATE_LIMIT is useless
 // against an IP-rotating botnet (each IP stays just under it); this site-wide cap
 // is the backstop.

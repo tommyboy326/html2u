@@ -26,7 +26,11 @@ function UploadIcon() {
   );
 }
 
-export default function CreateForm() {
+export default function CreateForm({
+  regionNotice,
+}: {
+  regionNotice?: string | null;
+}) {
   const [state, action, pending] = useActionState<ActionState, FormData>(
     createShareAction,
     {},
@@ -105,7 +109,12 @@ export default function CreateForm() {
         {/* HTML field: title row on top with upload action, dropzone below */}
         <div className="stack-sm">
           <div className="rowbetween" style={{ alignItems: "baseline" }}>
-            <span className="field-label">HTML 內容</span>
+            <span className="field-label">
+              HTML 內容{" "}
+              <span className="muted" style={{ fontWeight: 400 }}>
+                · 上限 1MB
+              </span>
+            </span>
             <span style={{ display: "flex", gap: 12 }}>
               {html && (
                 <button
@@ -217,6 +226,12 @@ export default function CreateForm() {
             </span>
           </span>
         </label>
+
+        {regionNotice && (
+          <p className="muted" style={{ fontSize: 13 }}>
+            🌏 {regionNotice}
+          </p>
+        )}
 
         <div>
           <button type="submit" disabled={pending || !html.trim()}>
