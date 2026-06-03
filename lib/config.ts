@@ -48,12 +48,21 @@ export type TtlKey = keyof typeof TTL_OPTIONS;
 export const DEFAULT_TTL: TtlKey = "7d";
 
 // Abuse limits.
-export const MAX_HTML_BYTES = 2 * 1024 * 1024; // 2 MB per share
+export const MAX_HTML_BYTES = 1 * 1024 * 1024; // 1 MB per share
 export const CREATE_LIMIT = 30; // shares per IP ...
 export const CREATE_WINDOW = 60 * 60; // ... per hour
 export const UNLOCK_LIMIT = 6; // password attempts per IP per share ...
 export const UNLOCK_WINDOW = 5 * 60; // ... per 5 minutes
 export const REPORT_LIMIT = 10; // reports per IP ...
 export const REPORT_WINDOW = 60 * 60; // ... per hour
+
+// View (read) abuse limits — applied on the raw content route. A share's HTML
+// can be served at most VIEW_LIMIT_PER_IP times per IP and VIEW_LIMIT_PER_SHARE
+// times across ALL IPs, per VIEW_WINDOW seconds. The per-share cap is what stops
+// distributed hot-linking / image-hosting abuse (the same link fetched from many
+// regions); excess requests get a tiny 429 instead of the full payload.
+export const VIEW_LIMIT_PER_IP = 20; // serves per IP per share ...
+export const VIEW_LIMIT_PER_SHARE = 60; // serves across all IPs per share ...
+export const VIEW_WINDOW = 60; // ... per minute
 
 export const IS_PROD = process.env.NODE_ENV === "production";

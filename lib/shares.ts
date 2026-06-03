@@ -3,10 +3,10 @@
 
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
-import { backend, type ShareMode, type StoredShare } from "./backend";
+import { backend, type ShareMode, type SortKey, type StoredShare } from "./backend";
 import { TTL_OPTIONS, type TtlKey, MAX_HTML_BYTES } from "./config";
 
-export type { ShareMode, StoredShare, ShareSummary } from "./backend";
+export type { ShareMode, SortKey, StoredShare, ShareSummary } from "./backend";
 
 const TOKEN_RE = /^[A-Za-z0-9_-]{1,64}$/;
 
@@ -23,7 +23,7 @@ export async function createShare(opts: {
   const html = opts.html ?? "";
   if (!html.trim()) throw new Error("HTML 內容不可為空");
   if (Buffer.byteLength(html, "utf8") > MAX_HTML_BYTES)
-    throw new Error("HTML 內容過大(上限 2MB)");
+    throw new Error("HTML 內容過大(上限 1MB)");
 
   const ttlSeconds = TTL_OPTIONS[opts.ttl] ?? TTL_OPTIONS["7d"];
   const id = nanoid(); // 21 url-safe chars — unguessable
@@ -106,7 +106,12 @@ export async function reportShare(id: string): Promise<void> {
 
 // --- Admin -------------------------------------------------------------------
 
-export async function listShares(opts: { limit: number; offset: number; q?: string }) {
+export async function listShares(opts: {
+  limit: number;
+  offset: number;
+  q?: string;
+  sort?: SortKey;
+}) {
   return backend().list(opts);
 }
 

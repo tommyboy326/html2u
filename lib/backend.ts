@@ -16,6 +16,10 @@ import {
 
 export type ShareMode = "link" | "password" | "magic";
 
+// Admin list ordering. "new" = newest first (default); "views"/"reports" =
+// highest first, for surfacing abuse (a hot-linked share spikes its view count).
+export type SortKey = "new" | "views" | "reports";
+
 export type StoredShare = {
   id: string;
   mode: ShareMode;
@@ -56,7 +60,12 @@ export interface Backend {
   incrViews(id: string): Promise<void>;
   report(id: string): Promise<void>;
   remove(id: string): Promise<void>;
-  list(opts: { limit: number; offset: number; q?: string }): Promise<{
+  list(opts: {
+    limit: number;
+    offset: number;
+    q?: string;
+    sort?: SortKey;
+  }): Promise<{
     items: ShareSummary[];
     total: number;
   }>;
@@ -173,14 +182,25 @@ class SupabaseBackend implements Backend {
     if (error) throw new Error(error.message);
   }
 
-  async list(opts: { limit: number; offset: number; q?: string }) {
+  async list(opts: {
+    limit: number;
+    offset: number;
+    q?: string;
+    sort?: SortKey;
+  }) {
+    const orderCol =
+      opts.sort === "views"
+        ? "views"
+        : opts.sort === "reports"
+          ? "reports"
+          : "created_at";
     let query = this.db
       .from("shares")
       .select(
         "id,mode,title,password_hash,one_time,allow_external,consumed_at,views,reports,created_ip,created_at,expires_at",
         { count: "exact" },
       )
-      .order("created_at", { ascending: false })
+      .order(orderCol, { ascending: false })
       .range(opts.offset, opts.offset + opts.limit - 1);
     if (opts.q) query = query.ilike("title", `%${opts.q}%`);
     const { data, error, count } = await query;
@@ -270,7 +290,12 @@ class FileBackend implements Backend {
     }
   }
 
-  async list(opts: { limit: number; offset: number; q?: string }) {
+  async list(opts: {
+    limit: number;
+    offset: number;
+    q?: string;
+    sort?: SortKey;
+  }) {
     let files: string[] = [];
     try {
       files = await fs.readdir(DATA_DIR);
@@ -292,7 +317,13 @@ class FileBackend implements Backend {
         /* skip */
       }
     }
-    all.sort((a, b) => b.createdAt - a.createdAt);
+    all.sort((a, b) =>
+      opts.sort === "views"
+        ? b.views - a.views
+        : opts.sort === "reports"
+          ? b.reports - a.reports
+          : b.createdAt - a.createdAt,
+    );
     const items = all.slice(opts.offset, opts.offset + opts.limit).map(toSummary);
     return { items, total: all.length };
   }

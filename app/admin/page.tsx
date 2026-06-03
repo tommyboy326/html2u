@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { ADMIN_COOKIE, verifyToken } from "@/lib/session";
 import { ADMIN_PASSWORD, HAS_GOOGLE_AUTH, isAdminEmail } from "@/lib/config";
 import { auth } from "@/auth";
-import { listShares } from "@/lib/shares";
+import { listShares, type SortKey } from "@/lib/shares";
 import { adminLogout, adminDeleteAction, loginWithGoogle } from "@/app/actions";
 import AdminLogin from "@/app/_components/AdminLogin";
 
@@ -32,7 +32,12 @@ async function isAdmin(): Promise<boolean> {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; error?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    page?: string;
+    error?: string;
+    sort?: string;
+  }>;
 }) {
   const sp = await searchParams;
 
@@ -63,13 +68,30 @@ export default async function AdminPage({
   const q = (sp.q || "").trim();
   const page = Math.max(1, Number(sp.page) || 1);
   const offset = (page - 1) * PAGE_SIZE;
+  const sort: SortKey =
+    sp.sort === "views" ? "views" : sp.sort === "reports" ? "reports" : "new";
 
   const { items, total } = await listShares({
     limit: PAGE_SIZE,
     offset,
     q: q || undefined,
+    sort,
   });
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Build an /admin URL preserving the active query/sort. Changing the sort
+  // resets to page 1; paging keeps the current sort.
+  const adminHref = (next: { sort?: SortKey; page?: number }): string => {
+    const p = new URLSearchParams();
+    if (q) p.set("q", q);
+    const s = next.sort ?? sort;
+    if (s !== "new") p.set("sort", s);
+    const pg = next.page ?? 1;
+    if (pg > 1) p.set("page", String(pg));
+    const qs = p.toString();
+    return qs ? `/admin?${qs}` : "/admin";
+  };
+  const sortArrow = (key: SortKey) => (sort === key ? " ↓" : "");
 
   return (
     <main className="container wide">
@@ -97,8 +119,16 @@ export default async function AdminPage({
               <th>標題</th>
               <th>層級</th>
               <th>外部</th>
-              <th>瀏覽</th>
-              <th>檢舉</th>
+              <th>
+                <a className="link" href={adminHref({ sort: "views" })}>
+                  瀏覽{sortArrow("views")}
+                </a>
+              </th>
+              <th>
+                <a className="link" href={adminHref({ sort: "reports" })}>
+                  檢舉{sortArrow("reports")}
+                </a>
+              </th>
               <th>上傳 IP</th>
               <th>到期</th>
               <th></th>
@@ -147,10 +177,7 @@ export default async function AdminPage({
       {pages > 1 && (
         <div className="row" style={{ marginTop: 24, justifyContent: "center" }}>
           {page > 1 && (
-            <a
-              className="pagelink"
-              href={`/admin?page=${page - 1}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-            >
+            <a className="pagelink" href={adminHref({ page: page - 1 })}>
               ← 上一頁
             </a>
           )}
@@ -158,10 +185,7 @@ export default async function AdminPage({
             第 {page} / {pages} 頁
           </span>
           {page < pages && (
-            <a
-              className="pagelink"
-              href={`/admin?page=${page + 1}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-            >
+            <a className="pagelink" href={adminHref({ page: page + 1 })}>
               下一頁 →
             </a>
           )}

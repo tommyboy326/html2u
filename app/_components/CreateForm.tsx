@@ -5,7 +5,7 @@ import { createShareAction, type ActionState } from "@/app/actions";
 
 // Must match MAX_HTML_BYTES on the server (lib/config.ts) so we fail-fast
 // in the browser instead of waiting for the round-trip.
-const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_BYTES = 1 * 1024 * 1024;
 
 // Small inline upload glyph — DESIGN.md voice: quiet outline, no decoration.
 function UploadIcon() {
@@ -51,7 +51,7 @@ export default function CreateForm() {
       return;
     }
     if (file.size > MAX_BYTES) {
-      setFileError("檔案過大,上限 2MB");
+      setFileError("檔案過大,上限 1MB");
       return;
     }
     try {
