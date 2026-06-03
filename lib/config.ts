@@ -37,6 +37,11 @@ export const CONTENT_ORIGIN = (process.env.CONTENT_ORIGIN || "").replace(/\/$/, 
 // The main app origin, used for iframe CSP when CONTENT_ORIGIN differs.
 export const APP_ORIGIN = (process.env.APP_ORIGIN || "").replace(/\/$/, "");
 
+// Canonical public URL — used as metadataBase so OG / favicon / share-preview
+// URLs resolve to absolute links (social scrapers require them). Falls back to
+// the production domain when APP_ORIGIN is unset.
+export const SITE_URL = APP_ORIGIN || "https://html2u.vercel.app";
+
 // Selectable lifetimes for a share.
 export const TTL_OPTIONS = {
   "1h": 60 * 60,
