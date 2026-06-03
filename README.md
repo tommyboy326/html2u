@@ -61,7 +61,9 @@ npm run dev                     # http://localhost:3000
 3. **核心**:設 `SESSION_SECRET`(`openssl rand -base64 32`)。
 4. **(建議)內容隔離**:準備第二個網域指向同一部署,設 `CONTENT_ORIGIN` 與 `APP_ORIGIN`,
    讓使用者內容與主網域完全隔離。
-5. 部署。首頁=上傳頁,`/admin`=管理後台。
+5. **(選用)建立地區限制**:設 `CREATE_ALLOWED_COUNTRIES`(ISO 國碼,逗號分隔,預設 `TW`)
+   限制可建立分享的來源國家;**檢視不受限**,寄給國外對方的連結照常開得了。留空 = 開放全球。
+6. 部署。首頁=上傳頁,`/admin`=管理後台。
 
 完整環境變數說明見 [`.env.example`](./.env.example)。
 
