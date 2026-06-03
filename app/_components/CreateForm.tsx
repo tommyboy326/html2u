@@ -219,7 +219,7 @@ export default function CreateForm() {
         </label>
 
         <div>
-          <button type="submit" disabled={pending}>
+          <button type="submit" disabled={pending || !html.trim()}>
             {pending ? "建立中…" : "建立分享連結"}
           </button>
           {state.error && (
