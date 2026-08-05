@@ -16,6 +16,7 @@ export async function createShare(opts: {
   password?: string;
   oneTime?: boolean;
   allowExternal?: boolean;
+  showBanner?: boolean; // only trusted (API-key) callers may pass false
   ttl: TtlKey;
   title?: string;
   ip?: string;
@@ -55,6 +56,7 @@ export async function createShare(opts: {
     views: 0,
     reports: 0,
     allowExternal: opts.allowExternal === true,
+    showBanner: opts.showBanner !== false,
     createdIp: opts.ip || null,
     createdAt: now,
     expiresAt: now + ttlSeconds * 1000,
@@ -117,6 +119,10 @@ export async function listShares(opts: {
 
 export async function adminDeleteShare(id: string): Promise<void> {
   if (TOKEN_RE.test(id)) await backend().remove(id);
+}
+
+export async function adminSetBanner(id: string, show: boolean): Promise<void> {
+  if (TOKEN_RE.test(id)) await backend().setBanner(id, show);
 }
 
 // --- Rate limiting -----------------------------------------------------------

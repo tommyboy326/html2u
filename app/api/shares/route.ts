@@ -22,6 +22,8 @@ export const dynamic = "force-dynamic";
 //
 //   mode: "link" (default) | "password" (needs "password") | "magic" (one-time link)
 //   allowExternal: true to permit external CDNs/resources (weaker CSP; default false)
+//   banner: false to hide the anti-phishing safety banner (trusted content only;
+//           default true — the anonymous web form cannot turn it off)
 //
 // The key holder is trusted, so the geo restriction is skipped here (so you can
 // call from a CI box or abroad); the anonymous web form keeps the geo gate. Rate
@@ -62,6 +64,7 @@ export async function POST(req: Request) {
       password: String(body.password ?? ""),
       oneTime: body.oneTime !== false,
       allowExternal: body.allowExternal === true,
+      showBanner: body.banner !== false,
       ttl: (typeof body.ttl === "string" ? body.ttl : "7d") as TtlKey,
       title: body.title ? String(body.title) : undefined,
       ip,

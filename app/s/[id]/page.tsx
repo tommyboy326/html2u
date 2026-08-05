@@ -55,7 +55,7 @@ export default async function SharePage({
 
   return (
     <div className="viewer">
-      <SafetyBanner id={id} />
+      {rec.showBanner && <SafetyBanner id={id} />}
       <iframe
         title="shared content"
         className="content-frame"

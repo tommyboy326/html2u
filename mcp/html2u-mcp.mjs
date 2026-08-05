@@ -66,6 +66,12 @@ const TOOL = {
           "Allow the page to load external resources (CDNs, images). Weakens the " +
           "sandbox CSP — default false",
       },
+      banner: {
+        type: "boolean",
+        description:
+          "Show the anti-phishing safety banner above the content. Defaults to " +
+          "false here (API-key shares are trusted); set true to keep the banner",
+      },
     },
     required: ["html"],
   },
@@ -91,6 +97,7 @@ async function shareHtml(args) {
       ttl: args.ttl || "7d",
       title: args.title,
       allowExternal: args.allowExternal === true,
+      banner: args.banner === true,
     }),
   });
   const data = await res.json().catch(() => ({}));

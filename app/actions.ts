@@ -28,6 +28,7 @@ import {
   verifySharePassword,
   consumeMagicLink,
   adminDeleteShare,
+  adminSetBanner,
   rateLimit,
   type ShareMode,
 } from "@/lib/shares";
@@ -115,6 +116,17 @@ export async function adminLogout(): Promise<void> {
 export async function adminDeleteAction(id: string): Promise<void> {
   if (!(await isAdmin())) return;
   await adminDeleteShare(id);
+  redirect("/admin");
+}
+
+// Toggle the anti-phishing safety banner on a share. Admin-only: anonymous
+// creators always get the banner; only trusted content earns an exemption.
+export async function adminToggleBannerAction(
+  id: string,
+  show: boolean,
+): Promise<void> {
+  if (!(await isAdmin())) return;
+  await adminSetBanner(id, show);
   redirect("/admin");
 }
 
