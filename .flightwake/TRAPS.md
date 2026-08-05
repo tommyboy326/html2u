@@ -5,6 +5,21 @@
 # 坑 Registry
 
 ---
+name: vercel-env-all-sensitive-unreadable
+type: constraint
+status: active
+tags: [vercel, secrets, prod]
+discovered: 2026-08-05
+---
+
+**症狀**:`vercel env pull` 拉回來的專案變數全是空字串;dashboard 也看不到值
+**根因**:html2u 專案的環境變數全部建立為 Sensitive(write-only),任何管道都讀不回來
+**解法/繞法**:忘了值就只能輪替(`vercel env rm` + `vercel env add` + redeploy);
+新值同步寫進本機 `.env.local`。另注意本機 vercel CLI 有多帳號,預設登入的帳號下有
+同名空殼專案——操作前先 `vercel whoami`
+**佐證**:[[records/260805-mcp-share-html.md]]
+
+---
 name: dual-state-md-gsd-vs-flightwake
 type: gotcha
 status: active
