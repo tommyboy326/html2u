@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "html2u": {
+      "command": "node",
+      "args": ["mcp/html2u-mcp.mjs"]
+    }
+  }
+}
