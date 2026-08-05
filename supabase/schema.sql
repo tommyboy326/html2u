@@ -19,8 +19,12 @@ create table if not exists public.shares (
   reports       integer not null default 0,
   created_ip    text,
   created_at    timestamptz not null default now(),
-  expires_at    timestamptz not null
+  expires_at    timestamptz not null,
+  show_banner   boolean not null default true
 );
+
+-- Migration for databases created before show_banner existed (additive, safe).
+alter table public.shares add column if not exists show_banner boolean not null default true;
 
 create index if not exists shares_expires_at_idx on public.shares (expires_at);
 create index if not exists shares_created_at_idx on public.shares (created_at desc);

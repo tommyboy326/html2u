@@ -32,6 +32,7 @@ export type StoredShare = {
   views: number;
   reports: number;
   allowExternal: boolean; // false = strict self-contained CSP (exfil-blocked)
+  showBanner: boolean; // anti-phishing banner outside the iframe (forced on for anonymous creators)
   createdIp: string | null;
   createdAt: number;
   expiresAt: number;
@@ -45,6 +46,7 @@ export type ShareSummary = {
   hasPassword: boolean;
   oneTime: boolean;
   allowExternal: boolean;
+  showBanner: boolean;
   consumedAt: number | null;
   views: number;
   reports: number;
@@ -59,6 +61,7 @@ export interface Backend {
   consumeMagic(id: string, token: string): Promise<StoredShare | null>; // atomic one-time
   incrViews(id: string): Promise<void>;
   report(id: string): Promise<void>;
+  setBanner(id: string, show: boolean): Promise<void>;
   remove(id: string): Promise<void>;
   list(opts: {
     limit: number;
@@ -79,6 +82,7 @@ const toSummary = (s: StoredShare): ShareSummary => ({
   hasPassword: !!s.passwordHash,
   oneTime: s.oneTime,
   allowExternal: s.allowExternal,
+  showBanner: s.showBanner,
   consumedAt: s.consumedAt,
   views: s.views,
   reports: s.reports,
@@ -97,6 +101,7 @@ type Row = {
   magic_token: string | null;
   one_time: boolean;
   allow_external: boolean;
+  show_banner: boolean;
   consumed_at: string | null;
   title: string | null;
   views: number;
@@ -114,6 +119,7 @@ const rowToShare = (r: Row): StoredShare => ({
   magicToken: r.magic_token,
   oneTime: r.one_time,
   allowExternal: r.allow_external,
+  showBanner: r.show_banner,
   consumedAt: r.consumed_at ? Date.parse(r.consumed_at) : null,
   title: r.title,
   views: r.views,
@@ -140,6 +146,7 @@ class SupabaseBackend implements Backend {
       magic_token: s.magicToken,
       one_time: s.oneTime,
       allow_external: s.allowExternal,
+      show_banner: s.showBanner,
       title: s.title,
       created_ip: s.createdIp,
       created_at: new Date(s.createdAt).toISOString(),
@@ -177,6 +184,14 @@ class SupabaseBackend implements Backend {
     await this.db.rpc("report_share", { p_id: id });
   }
 
+  async setBanner(id: string, show: boolean): Promise<void> {
+    const { error } = await this.db
+      .from("shares")
+      .update({ show_banner: show })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+  }
+
   async remove(id: string): Promise<void> {
     const { error } = await this.db.from("shares").delete().eq("id", id);
     if (error) throw new Error(error.message);
@@ -197,7 +212,7 @@ class SupabaseBackend implements Backend {
     let query = this.db
       .from("shares")
       .select(
-        "id,mode,title,password_hash,one_time,allow_external,consumed_at,views,reports,created_ip,created_at,expires_at",
+        "id,mode,title,password_hash,one_time,allow_external,show_banner,consumed_at,views,reports,created_ip,created_at,expires_at",
         { count: "exact" },
       )
       .order(orderCol, { ascending: false })
@@ -232,7 +247,9 @@ class FileBackend implements Backend {
   private async read(id: string): Promise<StoredShare | null> {
     try {
       const raw = await fs.readFile(fileFor(DATA_DIR, id), "utf8");
-      return JSON.parse(raw) as StoredShare;
+      const s = JSON.parse(raw) as StoredShare;
+      s.showBanner = s.showBanner !== false; // records predating the field default on
+      return s;
     } catch {
       return null;
     }
@@ -278,6 +295,14 @@ class FileBackend implements Backend {
     const s = await this.read(id);
     if (s) {
       s.reports += 1;
+      await this.write(s);
+    }
+  }
+
+  async setBanner(id: string, show: boolean): Promise<void> {
+    const s = await this.read(id);
+    if (s) {
+      s.showBanner = show;
       await this.write(s);
     }
   }

@@ -3,7 +3,12 @@ import { ADMIN_COOKIE, verifyToken } from "@/lib/session";
 import { ADMIN_PASSWORD, HAS_GOOGLE_AUTH, isAdminEmail } from "@/lib/config";
 import { auth } from "@/auth";
 import { listShares, type SortKey } from "@/lib/shares";
-import { adminLogout, adminDeleteAction, loginWithGoogle } from "@/app/actions";
+import {
+  adminLogout,
+  adminDeleteAction,
+  adminToggleBannerAction,
+  loginWithGoogle,
+} from "@/app/actions";
 import AdminLogin from "@/app/_components/AdminLogin";
 
 export const dynamic = "force-dynamic";
@@ -119,6 +124,7 @@ export default async function AdminPage({
               <th>標題</th>
               <th>層級</th>
               <th>外部</th>
+              <th>警示</th>
               <th>
                 <a className="link" href={adminHref({ sort: "views" })}>
                   瀏覽{sortArrow("views")}
@@ -138,7 +144,7 @@ export default async function AdminPage({
             {items.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={10}
                   className="muted"
                   style={{ textAlign: "center", padding: 32 }}
                 >
@@ -159,6 +165,13 @@ export default async function AdminPage({
                   {s.mode === "magic" && s.consumedAt ? "(已用)" : ""}
                 </td>
                 <td>{s.allowExternal ? "⚠ 是" : "否"}</td>
+                <td>
+                  <form action={adminToggleBannerAction.bind(null, s.id, !s.showBanner)}>
+                    <button className="utility" type="submit">
+                      {s.showBanner ? "顯示中" : "已隱藏"}
+                    </button>
+                  </form>
+                </td>
                 <td>{s.views}</td>
                 <td className={s.reports > 0 ? "error" : undefined}>{s.reports}</td>
                 <td className="small">{s.createdIp || "—"}</td>
