@@ -5,6 +5,27 @@
 # 坑 Registry
 
 ---
+name: supabase-ddl-postgrest-schema-cache
+type: trap
+status: active
+tags: [supabase, schema, prod, deploy]
+discovered: 2026-08-05
+---
+
+**症狀**:加了欄位、code 也部署了,insert 卻回
+「Could not find the '<col>' column of '<table>' in the schema cache」;
+偶爾又有一兩發成功(打到還沒換版的暖 function),誤導判斷
+**根因**:兩層——(1) migration 可能根本沒套進 app 連的那個資料庫(多專案/多帳號
+環境下跑錯地方,或誤以為跑過);(2) 就算套了,PostgREST 的 schema cache
+不一定自動重載
+**解法/繞法**:merge 前先以查詢驗證欄位存在
+(`select count(*) from information_schema.columns where table_schema='public'
+and table_name='…' and column_name='…'`);DDL 之後跟一句
+`NOTIFY pgrst, 'reload schema';`,不行就 Dashboard → Restart project。
+驗證 prod 行為要連發多次並檢查 create 回應本身,單發成功可能是暖 function 假象
+**佐證**:[[records/260805-banner-toggle-ship.md]]
+
+---
 name: vercel-env-all-sensitive-unreadable
 type: constraint
 status: active
