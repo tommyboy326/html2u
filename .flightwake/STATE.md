@@ -18,12 +18,14 @@ ADMIN_API_KEY 已輪替。
 
 # 進行中(未完成勿刪)
 
-- [ ] MCP branch 未推上 GitHub / 未開 PR;merge 後 MCP 註冊路徑要改指穩定 clone
-      (細節見 latest_record 的「未完/交接」)
+- [ ] PR #1(MCP + 警示 bar 開關)已開、等 merge;prod 的 show_banner 欄位
+      已由使用者先行套用(2026-08-05)
+- [ ] merge 後:prod 驗證(MCP 建一筆確認無警示條)→ MCP 註冊改指穩定 clone
+      → 補 record
 
 # 下一步入口
 
-1. 推 branch + 開 PR 到 main(`tommyboy326/html2u`;公司帳號已有 push 權)
+1. PR #1 merge 後照上面清單收尾
 2. Phase 2「i18n Foundation Bundle」→ 讀 `.planning/ROADMAP.md` 的 Phase 2 段,
    走 GSD `/gsd-execute-phase`(或先 plan);開工前先把 `.planning/STATE.md`
    對齊現況(它停在 2026-05-29 的 Phase 1 verifying,已落後)
